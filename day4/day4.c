@@ -158,23 +158,11 @@ magic:
         }
     }
 
-    pid_t pid1 = fork();
-    if (!pid1) {
-        execlp("mv", "mv", tmpOut, finalOut, NULL);
-        _exit(99);
-    } else {
-        printf(">> %d\n", nRolls);
-        fflush(stdout);
-    }
+    printf(">> %d\n", nRolls);
 
-    pid_t clean = fork();
-    if (!clean) {
-        execlp("rm", "rm", tmpIn, NULL);
-        _exit(99);
-    } else {
-
-        return exitCode;
-    }
+    rename(tmpOut, finalOut);
+    remove(tmpIn);
+    return exitCode;
 }
 
 int loop(FILE* file, FILE* tmp)
