@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 #define B_SIZE 32
+#define LEFT (-1)
 #define RIGHT 1
-#define LEFT 0
 #define COMBO 100
 
 static inline int mod(const int a, const int b)
@@ -17,23 +17,20 @@ static inline int zeros(int* pointer, const int rot, const int dir)
         return 0;
     }
 
+    const int val = mod(*pointer + (dir * rot), COMBO);
     int out = 0;
-    int val;
 
     if (dir == RIGHT) {
-        val = mod(*pointer + rot, COMBO);
         if (val < *pointer) {
             out = 1;
         }
-        goto leave;
+
+    } else {
+        if (val == 0 || (val > *pointer && *pointer != 0)) {
+            out = 1;
+        }
     }
 
-    val = mod(*pointer - rot, COMBO);
-    if (val == 0 || (val > *pointer && *pointer != 0)) {
-        out = 1;
-    }
-
-leave:
     *pointer = val;
     return out;
 }
