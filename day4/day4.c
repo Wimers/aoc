@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define B_SIZE 2048
+#define B_SIZE 512
 #define MAX_ROLLS 4
 #define RADIUS 1
 #define FIRST 1
