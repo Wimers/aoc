@@ -18,18 +18,9 @@ static inline int zeros(int* pointer, const int rot, const int dir)
     }
 
     const int val = mod(*pointer + (dir * rot), COMBO);
-    int out = 0;
-
-    if (dir == RIGHT) {
-        if (val < *pointer) {
-            out = 1;
-        }
-
-    } else {
-        if (val == 0 || (val > *pointer && *pointer != 0)) {
-            out = 1;
-        }
-    }
+    const int out = (dir == RIGHT)
+            ? (val < *pointer)
+            : ((val == 0) || (val > *pointer && *pointer != 0));
 
     *pointer = val;
     return out;
