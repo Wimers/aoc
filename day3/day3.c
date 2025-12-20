@@ -2,15 +2,27 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define B_SIZE 1024
+#define B_SIZE 128
+#define BATTERY_T 12
 
-static inline int search_buffer(char buffer[B_SIZE])
+static inline long nDigit_num(const int n)
 {
-    int top = -1;
-    int second = -1;
-    int nAfterTop = -1;
+    long out = 1;
 
-    for (int i = 0; i < B_SIZE; i++) {
+    for (int i = 1; i < n; i++) {
+        out *= 10;
+    }
+
+    return out;
+}
+
+static inline int best_choice(
+        char buffer[B_SIZE], const int offset, int* index, const int lineSize)
+{
+    int best = -1;
+
+    for (int i = *index; i < B_SIZE; i++) {
+
         const char c = buffer[i];
         if (c == 0) {
             break;
@@ -18,25 +30,42 @@ static inline int search_buffer(char buffer[B_SIZE])
 
         const int val = c - '0';
 
-        if (val > top) {
-            second = top;
-            top = val;
-            nAfterTop = -1;
-        } else {
-            if (val > nAfterTop) {
-                nAfterTop = val;
+        if ((val > best) && (lineSize >= i + offset)) {
+            best = val;
+            *index = i;
+
+            if (best == 9) {
+                break;
             }
         }
     }
 
-    if (nAfterTop == -1) {
-        return (second * 10 + top);
-    }
-
-    return (top * 10 + nAfterTop);
+    return best;
 }
 
-int main(int argc, char* argv[])
+long search_buffer(char buffer[B_SIZE])
+{
+    int array[BATTERY_T];
+    memset(&array, -1, sizeof(array));
+
+    size_t lineSize = strlen(buffer) - 1;
+
+    long total = 0;
+    int index = -1;
+
+    for (int i = 0; i < BATTERY_T; i++) {
+
+        const int offset = BATTERY_T - i;
+        index++;
+
+        array[i] = best_choice(buffer, offset, &index, lineSize);
+        total += array[i] * nDigit_num(offset);
+    }
+
+    return total;
+}
+
+int main(const int argc, char* argv[])
 {
     // Check input file specified
     if (argc != 2) {
@@ -51,14 +80,14 @@ int main(int argc, char* argv[])
     FILE* file = fopen(argv[1], "r");
     char* line = NULL;
 
-    int joltage = 0;
+    long joltage = 0;
 
     // Calculate max joltage for each line and add to total
     while ((line = fgets(buffer, B_SIZE, file)) != NULL) {
         joltage += search_buffer(buffer);
     }
 
-    printf(">> %d Jolts\n", joltage);
+    printf(">> %ld Jolts\n", joltage);
     fflush(stdout);
     fclose(file);
 }
