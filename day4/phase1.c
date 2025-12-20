@@ -1,24 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/wait.h>
 
-#define B_SIZE 2048
+#define B_SIZE 256
 #define MAX_ROLLS 4
 #define RADIUS 1
 #define FIRST 1
-#define SECOND 2
 #define LAST (-1)
 
 const char rollSymb = '@';
-const char removeSymb = 'x';
-
-const char* const tmpIn = "in.tmp";
-const char* const tmpOut = "out.tmp";
-const char* const finalOut = "final.out";
-
-int loop(FILE* file, FILE* tmp);
 
 typedef struct {
     char r1[B_SIZE];
@@ -27,12 +17,8 @@ typedef struct {
     int size;
 } Rows;
 
-void move_rows(FILE* tmp, Rows* rows, char buffer[B_SIZE], int flag)
+void move_rows(Rows* rows, char buffer[B_SIZE])
 {
-    if (flag != FIRST && flag != SECOND) {
-        fwrite(&(rows->r1), sizeof(char), rows->size + 1, tmp);
-    }
-
     memcpy(rows->r1, rows->r2, B_SIZE);
     memcpy(rows->r2, rows->r3, B_SIZE);
     memcpy(rows->r3, buffer, B_SIZE);
@@ -88,9 +74,6 @@ int normal_checks(Rows* rows, const int index, const int radius, const int flag)
 int forklift(Rows* rows, const int flag)
 {
     int accessable = 0;
-    int updated = 0;
-
-tryAgain:
 
     for (int i = 0; i < rows->size; i++) {
         if ((rows->r2)[i] == rollSymb) {
@@ -98,15 +81,8 @@ tryAgain:
 
             if (count < MAX_ROLLS + 1) {
                 accessable++;
-                (rows->r2)[i] = removeSymb;
-                updated = 1;
             }
         }
-    }
-
-    if (updated) {
-        updated = 0;
-        goto tryAgain;
     }
 
     return accessable;
@@ -119,86 +95,24 @@ int main(const int argc, char* argv[])
         exit(1);
     }
 
-    int nRolls = 0;
-
-    // Open input file
-    FILE* file = fopen(argv[1], "r");
-
-    // Open file for storage
-    FILE* tmp = fopen(tmpOut, "w");
-
-    int yield = loop(file, tmp);
-    fclose(file);
-    fclose(tmp);
-
-    int exitCode = 0;
-magic:
-
-    if (yield != 0) {
-
-        nRolls += yield;
-        pid_t pid = fork();
-
-        if (!pid) {
-            execlp("cp", "cp", tmpOut, tmpIn, NULL);
-            _exit(99);
-        } else {
-            waitpid(pid, 0, 0);
-
-            FILE* newIn = fopen(tmpIn, "r");
-            FILE* newOut = fopen(tmpOut, "w");
-
-            yield = loop(newIn, newOut);
-            fclose(newIn);
-            fclose(newOut);
-
-            exitCode++;
-
-            goto magic;
-        }
-    }
-
-    pid_t pid1 = fork();
-    if (!pid1) {
-        execlp("mv", "mv", tmpOut, finalOut, NULL);
-        _exit(99);
-    } else {
-        printf(">> %d\n", nRolls);
-        fflush(stdout);
-    }
-
-    pid_t clean = fork();
-    if (!clean) {
-        execlp("rm", "rm", tmpIn, NULL);
-        _exit(99);
-    } else {
-
-        return exitCode;
-    }
-}
-
-int loop(FILE* file, FILE* tmp)
-{
     Rows rows;
     memset(&rows, 0, sizeof(rows));
 
     char buffer[B_SIZE];
     memset(&buffer, 0, sizeof(buffer));
 
+    // Open input file
+    FILE* file = fopen(argv[1], "r");
+
+    int nRolls = 0;
+
     // Read first line and copy to Rows struct
     int flag = FIRST;
     char* line = fgets(buffer, B_SIZE, file);
+    memcpy(&(rows.r3), &buffer, B_SIZE);
 
-    if (line != NULL) {
-        memcpy(&(rows.r3), &buffer, B_SIZE);
-
-        // Set size of row (-1 to account for new line)
-        if (rows.size == 0) {
-            rows.size = strlen(line) - 1;
-        }
-    }
-
-    int yield = 0;
+    // Set size of row (-1 to account for new line)
+    rows.size = strlen(line) - 1;
 
     while (1) {
 
@@ -209,27 +123,22 @@ int loop(FILE* file, FILE* tmp)
         }
 
         // Rearrange rows to fit the newly read line
-        move_rows(tmp, &rows, buffer, flag);
+        move_rows(&rows, buffer);
 
         // Calc number of accessable rolls in middle row, given the previous and
         // next rows.
-        yield += forklift(&rows, flag);
+        nRolls += forklift(&rows, flag);
 
         // All rows read
         if (flag == LAST) {
-            fwrite(&(rows.r1), sizeof(char), rows.size + 1, tmp);
-            fwrite(&(rows.r2), sizeof(char), rows.size + 1, tmp);
             break;
-        }
-
-        if (flag == FIRST) {
-            flag = SECOND;
-            continue;
         }
 
         // Reset flag to normal mode
         flag = 0;
     }
 
-    return yield;
+    printf(">> %d\n", nRolls);
+    fflush(stdout);
+    fclose(file);
 }
