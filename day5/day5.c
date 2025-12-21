@@ -111,17 +111,12 @@ int file_lc(FILE* file, char* buffer, int bufSize)
 void parse_id_ranges(
         FILE* file, int lc, long (*ranges)[2], char* buffer, int bufSize)
 {
-    char* line = NULL;
-    int i = 0;
+    for (int i = 0; i < lc; i++) {
+        char* line = fgets(buffer, bufSize, file);
+        char* endptr = NULL;
 
-    for (; i < lc; i++) {
-        line = fgets(buffer, bufSize, file);
-
-        for (int j = 0; j < bufSize; j++) {
-            char* endptr = NULL;
-            ranges[i][0] = strtol(line, &endptr, 10);
-            ranges[i][1] = strtol(endptr + 1, NULL, 10);
-        }
+        ranges[i][0] = strtol(line, &endptr, 10);
+        ranges[i][1] = strtol(endptr + 1, NULL, 10);
     }
 }
 
