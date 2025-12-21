@@ -4,9 +4,95 @@
 
 #define B_SIZE 64
 
-static inline int within_range(long start, long end, long val)
+static inline long in_range(const long start, const long end)
 {
-    return (start <= val && val <= end);
+    if (end == 0 && start == 0) {
+        return 0;
+    }
+
+    return (end - start + 1);
+}
+
+static inline void remove_redundant(long* sR, long* eR, long* start, long* end)
+{
+    // Subset
+    if (*start <= *sR && *eR <= *end) {
+        *sR = 0;
+        *eR = 0;
+        return;
+    }
+
+    // Disjoint
+    if ((*sR > *end) || (*eR < *start)) {
+        return;
+    }
+
+    // Super set
+    if (*sR <= *start && *eR >= *end) {
+        *start = 0;
+        *end = 0;
+        return;
+    }
+
+    // Left within range, right is outside
+    if ((*start <= *sR) && (*eR > *end)) {
+        *end = *eR;
+        *eR = 0;
+        *sR = 0;
+        return;
+    }
+
+    // Right within range, left is outside
+    if ((*eR <= *end) && (*sR < *start)) {
+        *start = *sR;
+        *eR = 0;
+        *sR = 0;
+        return;
+    }
+}
+
+void check_ranges(int lc, long (*range)[2])
+{
+    int i = 0;
+    for (; i < lc; i++) {
+
+        long* sSrt = &(range[i][0]);
+        long* sEnd = &(range[i][1]);
+
+        if (*sSrt == 0 && *sEnd == 0) {
+            continue;
+        }
+
+        // Swap so sSrt < sEnd
+        if (*sEnd < *sSrt) {
+            long tmp = *sSrt;
+            *sSrt = *sEnd;
+            *sEnd = tmp;
+        }
+
+        for (int j = 0; j < lc; j++) {
+
+            if (i == j) {
+                continue;
+            }
+
+            long* start = &(range[j][0]);
+            long* end = &(range[j][1]);
+
+            if (*start == 0 && *end == 0) {
+                continue;
+            }
+
+            // Swap so start < end
+            if (*end < *start) {
+                long tmp = *start;
+                *start = *end;
+                *end = tmp;
+            }
+
+            remove_redundant(sSrt, sEnd, start, end);
+        }
+    }
 }
 
 int file_lc(FILE* file, char* buffer, int bufSize)
@@ -39,21 +125,15 @@ void parse_id_ranges(
     }
 }
 
-int main(int argc, char* argv[])
+long calc_total_fresh_ids(char* path)
 {
-    if (argc != 3) {
-        printf("Usage: ./day5 <idRanges> <ingredientIDs>\n");
-        exit(99);
-    }
-
-    int freshIDs = 0;
-    int lc;
+    long totalFreshIDs = 0;
 
     char buffer[B_SIZE];
     memset(&buffer, 0, sizeof(buffer));
 
-    FILE* idRanges = fopen(argv[1], "r");
-    lc = file_lc(idRanges, buffer, B_SIZE);
+    FILE* idRanges = fopen(path, "r");
+    int lc = file_lc(idRanges, buffer, B_SIZE);
 
     long ranges[lc][2];
     memset(&ranges, 0, sizeof(ranges));
@@ -61,21 +141,25 @@ int main(int argc, char* argv[])
     parse_id_ranges(idRanges, lc, ranges, buffer, B_SIZE);
     fclose(idRanges);
 
-    FILE* ingredients = fopen(argv[2], "r");
-    char* line = NULL;
+    check_ranges(lc, ranges);
 
-    while ((line = fgets(buffer, B_SIZE, ingredients)) != NULL) {
-        const long product = strtol(line, NULL, 10);
-
-        for (int k = 0; k < lc; k++) {
-            if (within_range(ranges[k][0], ranges[k][1], product)) {
-                freshIDs++;
-                break;
-            }
-        }
+    for (int i = 0; i < lc; i++) {
+        totalFreshIDs += in_range(ranges[i][0], ranges[i][1]);
     }
 
-    printf(">> %d\n", freshIDs);
+    return totalFreshIDs;
+}
+
+int main(const int argc, char* argv[])
+{
+    if (argc != 2) {
+        printf("Usage: ./day5 <idRanges>\n");
+        exit(99);
+    }
+
+    const long totFreshIDs = calc_total_fresh_ids(argv[1]);
+
+    printf(">> %ld\n", totFreshIDs);
     fflush(stdout);
-    fclose(ingredients);
+    return 0;
 }
