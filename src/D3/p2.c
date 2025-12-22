@@ -5,6 +5,8 @@
 #define B_SIZE 128
 #define BATTERY_T 12
 
+const char* const input = "src/D3/input";
+
 static inline long nDigit_num(const int n)
 {
     long out = 1;
@@ -67,17 +69,12 @@ long search_buffer(char buffer[B_SIZE])
 
 int main(const int argc, char* argv[])
 {
-    // Check input file specified
-    if (argc != 2) {
-        exit(1);
-    }
-
     // Initialise char buffer
     char buffer[B_SIZE];
     memset(&buffer, 0, sizeof(buffer));
 
     // Open input file
-    FILE* file = fopen(argv[1], "r");
+    FILE* file = fopen(input, "r");
     char* line = NULL;
 
     long joltage = 0;

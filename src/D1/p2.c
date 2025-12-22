@@ -29,7 +29,7 @@ static inline int zeros(int* pointer, const int rot, const int dir)
 int main(int argc, char* argv[])
 {
     // Open the input data file
-    FILE* file = fopen(argv[1], "r");
+    FILE* file = fopen("src/D1/input", "r");
 
     // Init combo
     int pointer = 50;

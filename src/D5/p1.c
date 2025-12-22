@@ -4,6 +4,9 @@
 
 #define B_SIZE 64
 
+const char* const rangesInput = "src/D5/idRanges";
+const char* const ingredientsInput = "src/D5/ingredientIDs";
+
 static inline int within_range(long start, long end, long val)
 {
     return (start <= val && val <= end);
@@ -41,18 +44,13 @@ void parse_id_ranges(
 
 int main(int argc, char* argv[])
 {
-    if (argc != 3) {
-        printf("Usage: ./day5 <idRanges> <ingredientIDs>\n");
-        exit(99);
-    }
-
     int freshIDs = 0;
     int lc;
 
     char buffer[B_SIZE];
     memset(&buffer, 0, sizeof(buffer));
 
-    FILE* idRanges = fopen(argv[1], "r");
+    FILE* idRanges = fopen(rangesInput, "r");
     lc = file_lc(idRanges, buffer, B_SIZE);
 
     long ranges[lc][2];
@@ -61,7 +59,7 @@ int main(int argc, char* argv[])
     parse_id_ranges(idRanges, lc, ranges, buffer, B_SIZE);
     fclose(idRanges);
 
-    FILE* ingredients = fopen(argv[2], "r");
+    FILE* ingredients = fopen(ingredientsInput, "r");
     char* line = NULL;
 
     while ((line = fgets(buffer, B_SIZE, ingredients)) != NULL) {

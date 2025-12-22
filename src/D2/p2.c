@@ -5,6 +5,8 @@
 
 #define B_SIZE 1024
 
+const char* const input = "src/D2/input";
+
 static inline int count_digits(const long long n)
 {
     if (n < 10) {
@@ -34,7 +36,7 @@ int main(int argc, char* argv[])
     char buffer[B_SIZE];
     memset(&buffer, 0, sizeof(buffer));
 
-    FILE* file = fopen(argv[1], "r");
+    FILE* file = fopen(input, "r");
     char* line = fgets(buffer, B_SIZE, file);
     if (line == NULL) {
         exit(99);
@@ -80,26 +82,60 @@ leave:
 
 void find_error(const long long start, const long long end)
 {
-    for (long long i = start; i <= end; i++) {
-        int n = count_digits(i);
+    // For each number from start to end
+    for (long long num = start; num <= end; num++) {
 
-        if (n % 2) {
-            i = nDigit_num(n + 1) - 1;
+        // Calculate number of digits in number
+        int n = count_digits(num);
 
-        } else {
-            char str[20];
-            sprintf(str, "%lld", i);
+        // Convert number to a char array
+        char str[40];
+        sprintf(str, "%lld", num);
 
-            int half = n >> 1;
+        // Check for pattern in pairs of 1, 2, ... n / 2
+        for (int rep = 1; rep <= n >> 1; rep++) {
 
-            for (int k = 0; k < half; k++) {
+            // If pattern width doesn't neatly fit into number length
+            // ignore and move on
+            if (n % rep != 0) {
+                continue;
+            }
 
-                if (str[k] != str[k + half]) {
-                    goto leave;
+            // Create temporary buffers
+            char ref[rep];
+            char temp[rep];
+            memset(&ref, 0, sizeof(ref));
+            memset(&temp, 0, sizeof(temp));
+
+            // Populate reference buffer
+            for (int i = 0; i < rep; i++) {
+                ref[i] = str[i];
+            }
+
+            // For each windows that need to be checked
+            for (int loop = 1; loop < (n / rep); loop++) {
+
+                // Populate temp buffer
+                for (int i = 0; i < rep; i++) {
+                    temp[i] = str[rep * loop + i];
+                }
+
+                // If reference and temp buffers don't match,
+                // go to the next pattern size.
+                if (memcmp(ref, temp, rep) != 0) {
+                    goto next;
                 }
             }
-            sol += i;
+
+            // All checks passed, pattern detected
+            sol += num;
+            goto leave;
+
+        next:
+            continue;
         }
+
+        // To next number
     leave:
         continue;
     }

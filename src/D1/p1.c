@@ -11,7 +11,7 @@ static inline int mod(const int a, const int b)
 
 int main(const int argc, char* argv[])
 {
-    FILE* file = fopen(argv[1], "r");
+    FILE* file = fopen("src/D1/input", "r");
 
     int pointer = 50;
 

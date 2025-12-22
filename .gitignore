@@ -1,3 +1,6 @@
 .clang-format
+*.o
+*-p1
+*-p2
 /day7
 /test

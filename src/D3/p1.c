@@ -4,6 +4,8 @@
 
 #define B_SIZE 1024
 
+const char* const input = "src/D3/input";
+
 static inline int search_buffer(char buffer[B_SIZE])
 {
     int top = -1;
@@ -38,17 +40,12 @@ static inline int search_buffer(char buffer[B_SIZE])
 
 int main(int argc, char* argv[])
 {
-    // Check input file specified
-    if (argc != 2) {
-        exit(1);
-    }
-
     // Initialise char buffer
     char buffer[B_SIZE];
     memset(&buffer, 0, sizeof(buffer));
 
     // Open input file
-    FILE* file = fopen(argv[1], "r");
+    FILE* file = fopen(input, "r");
     char* line = NULL;
 
     int joltage = 0;

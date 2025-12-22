@@ -14,6 +14,7 @@
 const char rollSymb = '@';
 const char removeSymb = 'x';
 
+const char* const input = "src/D4/input";
 const char* const tmpIn = "in.tmp";
 const char* const tmpOut = "out.tmp";
 const char* const finalOut = "final.out";
@@ -114,15 +115,10 @@ tryAgain:
 
 int main(const int argc, char* argv[])
 {
-    // Check input file specified
-    if (argc != 2) {
-        exit(1);
-    }
-
     int nRolls = 0;
 
     // Open input file
-    FILE* file = fopen(argv[1], "r");
+    FILE* file = fopen(input, "r");
 
     // Open file for storage
     FILE* tmp = fopen(tmpOut, "w");

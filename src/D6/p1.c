@@ -4,6 +4,8 @@
 
 #define B_SIZE 4096
 
+const char* const input = "src/D6/input";
+
 typedef struct {
     int problemNum;
     int lc;
@@ -152,14 +154,10 @@ long solve_problem_set(Dimensions* dimn, FILE* file, char* buffer, int bufSize)
 
 int main(int argc, char* argv[])
 {
-    if (argc != 2) {
-        exit(99);
-    }
-
     char buffer[B_SIZE];
     memset(&buffer, 0, sizeof(buffer));
 
-    FILE* file = fopen(argv[1], "r");
+    FILE* file = fopen(input, "r");
 
     Dimensions dimn;
     memset(&dimn, 0, sizeof(dimn));

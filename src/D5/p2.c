@@ -4,6 +4,8 @@
 
 #define B_SIZE 64
 
+const char* const rangesInput = "src/D5/idRanges";
+
 static inline long in_range(const long start, const long end)
 {
     if (end == 0 && start == 0) {
@@ -120,7 +122,7 @@ void parse_id_ranges(
     }
 }
 
-long calc_total_fresh_ids(char* path)
+long calc_total_fresh_ids(const char* path)
 {
     long totalFreshIDs = 0;
 
@@ -147,12 +149,7 @@ long calc_total_fresh_ids(char* path)
 
 int main(const int argc, char* argv[])
 {
-    if (argc != 2) {
-        printf("Usage: ./day5 <idRanges>\n");
-        exit(99);
-    }
-
-    const long totFreshIDs = calc_total_fresh_ids(argv[1]);
+    const long totFreshIDs = calc_total_fresh_ids(rangesInput);
 
     printf(">> %ld\n", totFreshIDs);
     fflush(stdout);

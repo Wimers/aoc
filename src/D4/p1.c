@@ -8,6 +8,8 @@
 #define FIRST 1
 #define LAST (-1)
 
+const char* const input = "src/D4/input";
+
 const char rollSymb = '@';
 
 typedef struct {
@@ -90,11 +92,6 @@ int forklift(Rows* rows, const int flag)
 
 int main(const int argc, char* argv[])
 {
-    // Check input file specified
-    if (argc != 2) {
-        exit(1);
-    }
-
     Rows rows;
     memset(&rows, 0, sizeof(rows));
 
@@ -102,7 +99,7 @@ int main(const int argc, char* argv[])
     memset(&buffer, 0, sizeof(buffer));
 
     // Open input file
-    FILE* file = fopen(argv[1], "r");
+    FILE* file = fopen(input, "r");
 
     int nRolls = 0;
 
