@@ -148,7 +148,7 @@ magic:
             fclose(newIn);
             fclose(newOut);
 
-            exitCode++;
+            // exitCode++; // Returns numbers of file iterations
 
             goto magic;
         }
