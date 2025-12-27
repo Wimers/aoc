@@ -6,9 +6,10 @@
 #define RIGHT 1
 #define COMBO 100
 
-static inline int mod(const int a, const int b)
+static inline int mod(int a, const int b)
 {
-    return ((a % b + b) % b);
+    int r = a % b;
+    return r + (b & (r >> 31));
 }
 
 static inline int zeros(int* pointer, const int rot, const int dir)
